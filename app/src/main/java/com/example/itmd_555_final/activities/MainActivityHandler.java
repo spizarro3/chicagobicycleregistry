@@ -3,8 +3,12 @@ package com.example.itmd_555_final.activities;
 import android.content.Context;
 import android.view.View;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.itmd_555_final.R;
+import com.example.itmd_555_final.fragments.ProfileFragment;
 import com.example.itmd_555_final.util.ShowProfileHelper;
 import com.example.itmd_555_final.data.repository.BikeRepository;
 import com.example.itmd_555_final.models.Bicycle;
@@ -33,8 +37,13 @@ public class MainActivityHandler {
 
     // Profile form
     public void showProfileOptions() {
-        setRecyclerViewAdapter(new ProfileFormAdapter(context, currentClient));
+        Fragment profileFragment = new ProfileFragment();
+        ((AppCompatActivity) context).getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragmentContainer, profileFragment)
+                .commit();
     }
+
 
     // All stolen bikes (no delete option)
     public void showAllStolenBikes() {

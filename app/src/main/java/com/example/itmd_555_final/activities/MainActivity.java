@@ -1,3 +1,4 @@
+// MainActivity.java
 package com.example.itmd_555_final.activities;
 
 import android.annotation.SuppressLint;
@@ -7,33 +8,23 @@ import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.itmd_555_final.R;
 import com.example.itmd_555_final.activities.client.LoginActivity;
-import com.example.itmd_555_final.adapter.BikeAdapter;
-import com.example.itmd_555_final.controllers.BottomSheetController;
 import com.example.itmd_555_final.data.repository.BikeRepository;
 import com.example.itmd_555_final.fragments.BicycleListFragment;
 import com.example.itmd_555_final.fragments.MapFragment;
-import com.example.itmd_555_final.models.Bicycle;
+import com.example.itmd_555_final.fragments.RegisterBikeFragment;
 import com.example.itmd_555_final.models.Client;
 import com.example.itmd_555_final.util.SessionManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
-
-import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
     private MainActivityHandler handler;
-    private BottomSheetController bottomSheetController;
-    private BottomSheetBehavior<View> bottomSheetBehavior;
-    private View bottomSheet;
-    private RecyclerView recyclerView;
     private View fragmentContainer;
 
-    @SuppressLint("NonConstantResourceId")
+    @SuppressLint({"NonConstantResourceId", "MissingInflatedId"})
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,22 +41,9 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // Setup views
-        bottomSheet = findViewById(R.id.bottomSheet);
-        recyclerView = findViewById(R.id.recyclerViewMapBikes);
         fragmentContainer = findViewById(R.id.fragmentContainer);
 
-        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
-        bottomSheetBehavior.setHideable(false); // Optional: prevent full hiding
-        bottomSheetBehavior.setPeekHeight(400); // Starting visible height
-        bottomSheetBehavior.setDraggable(true); // Allow drag to expand/collapse
-        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-
-        bottomSheetController = new BottomSheetController(bottomSheet, recyclerView);
-        bottomSheetController.updateRecyclerView(new BikeAdapter(this, new ArrayList<>(), false));
-        bottomSheetController.collapse();
-
-        handler = new MainActivityHandler(this, recyclerView, currentClient);
+        handler = new MainActivityHandler(this, null, currentClient);
 
         BottomNavigationView nav = findViewById(R.id.bottomNavigationView);
         nav.setOnItemSelectedListener(item -> {
@@ -73,32 +51,20 @@ public class MainActivity extends AppCompatActivity {
 
             if (itemId == R.id.nav_map) {
                 MapFragment mapFragment = new MapFragment();
-
-                mapFragment.setOnMapBoundsChangedListener(filteredBikes -> {
-                    runOnUiThread(() -> {
-                        bottomSheetController.updateRecyclerView(new BikeAdapter(this, filteredBikes, false));
-                        bottomSheetController.collapse();
-                    });
-                });
-
                 showFragment(mapFragment);
                 return true;
 
             } else if (itemId == R.id.nav_list) {
-                bottomSheetController.hide();
                 showFragment(new BicycleListFragment());
                 return true;
 
             } else if (itemId == R.id.nav_add) {
-                handler.registerNewBike();
-                fragmentContainer.setVisibility(View.GONE);
-                bottomSheetController.hide();
+                showFragment(new RegisterBikeFragment());
+
                 return true;
 
             } else if (itemId == R.id.nav_profile) {
                 handler.showProfileOptions();
-                fragmentContainer.setVisibility(View.GONE);
-                bottomSheetController.hide();
                 return true;
             }
 
@@ -106,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Default view
-        nav.setSelectedItemId(R.id.nav_map);
+//        nav.setSelectedItemId(R.id.nav_map);
     }
 
     private void showFragment(Fragment fragment) {
@@ -115,7 +81,6 @@ public class MainActivity extends AppCompatActivity {
                 .commit();
 
         fragmentContainer.setVisibility(View.VISIBLE);
-        bottomSheetController.collapse();
     }
 
     @Override
